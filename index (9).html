@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Latimore AI Hub - Enhanced</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              navy: '#0B0F17',
+              gold: '#C9A25F',
+              slate: '#64748b'
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+  </style>
+</head>
+<body class="bg-gray-50">
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect, useRef } = React;
+
+    // Storage utilities
+    const Storage = {
+      save: (key, data) => {
+        try {
+          localStorage.setItem(key, JSON.stringify(data));
+          return true;
+        } catch (e) {
+          console.error('Storage error:', e);
+          return false;
+        }
+      },
+      load: (key, defaultValue = null) => {
+        try {
+          const item = localStorage.getItem(key);
+          return item ? JSON.parse(item) : defaultValue;
+        } catch (e) {
+          return defaultValue;
+        }
+      },
+      append: (key, item) => {
+        const current = Storage.load(key, []);
+        current.push({ ...item, id: Date.now(), timestamp: new Date().toISOString() });
+        Storage.save(key, current);
+        return current;
+      }
+    };
+
+    // Configuration
+    const CONFIG = {
+      name: "Jackson M. Latimore Sr.",
+      brand: "Latimore Life & Legacy",
+      phone: "(856) 895-1457",
+      email: "jackson1989@latimorelegacy.com",
+      booking: "https://globalfinancialimpact.fillout.com/latimorelifelegacy",
+      quote: "https://agents.ethoslife.com/invite/29ad1",
+      area: "Schuylkill, Luzerne, and Northumberland counties, Pennsylvania"
+    };
+
+    // Dashboard Component
+    function Dashboard() {
+      const [stats, setStats] = useState({
+        emails: 0,
+        social: 0,
+        snapshots: 0,
+        products: 0,
+        total: 0
+      });
+
+      const [analytics, setAnalytics] = useState({
+        thisWeek: 0,
+        thisMonth: 0,
+        avgPerDay: 0
+      });
+
+      useEffect(() => {
+        const history = Storage.load('content-history', []);
+        const now = new Date();
+        const weekAgo = new Date(now - 7 * 24 * 60 * 60 * 1000);
+        const monthAgo = new Date(now - 30 * 24 * 60 * 60 * 1000);
+
+        const thisWeek = history.filter(h => new Date(h.timestamp) > weekAgo).length;
+        const thisMonth = history.filter(h => new Date(h.timestamp) > monthAgo).length;
+
+        setStats({
+          emails: history.filter(h => h.type === 'email').length,
+          social: history.filter(h => h.type === 'social').length,
+          snapshots: history.filter(h => h.type === 'snapshot').length,
+          products: history.filter(h => h.type === 'product').length,
+          total: history.length
+        });
+
+        setAnalytics({
+          thisWeek: thisWeek,
+          thisMonth: thisMonth,
+          avgPerDay: (thisMonth / 30).toFixed(1)
+        });
+      }, []);
+
+      return (
+        <div className="p-6 space-y-6">
+          <div className="flex justify-between items-center">
+            <h2 className="text-3xl font-bold text-brand-navy">Dashboard</h2>
+            <div className="text-sm text-gray-500">
+              {new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+            <StatCard value={stats.emails} label="Emails" />
+            <StatCard value={stats.social} label="Social Posts" />
+            <StatCard value={stats.snapshots} label="Snapshots" />
+            <StatCard value={stats.products} label="Products" />
+            <StatCard value={stats.total} label="Total" />
+          </div>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 text-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg font-semibold mb-4">📊 Performance Analytics</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span>This Week:</span>
+                  <span className="text-2xl font-bold">{analytics.thisWeek}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>This Month:</span>
+                  <span className="text-2xl font-bold">{analytics.thisMonth}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>Daily Average:</span>
+                  <span className="text-2xl font-bold">{analytics.avgPerDay}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-gradient-to-br from-green-500 to-green-600 text-white p-6 rounded-lg shadow-lg">
+              <h3 className="text-lg font-semibold mb-4">💰 Time Value Calculator</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span>Hours Saved:</span>
+                  <span className="text-2xl font-bold">{(stats.total * 1.5).toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span>$ Value (@$75/hr):</span>
+                  <span className="text-2xl font-bold">${(stats.total * 1.5 * 75).toFixed(0)}</span>
+                </div>
+                <div className="text-sm opacity-90 mt-2">
+                  Working {((stats.total * 1.5 / 40) || 0).toFixed(1)}x more efficiently
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-3 text-brand-navy">⚡ Quick Actions</h3>
+            <div className="grid md:grid-cols-3 gap-3">
+              <QuickLink href={CONFIG.quote} label="🎯 Ethos Quote" primary />
+              <QuickLink href="https://globalfinancialimpact.fillout.com/t/tMz7ZcqpaZus" label="📋 New Application" secondary />
+              <QuickLink href={CONFIG.booking} label="📅 Schedule" outline />
+            </div>
+          </div>
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="text-lg font-semibold mb-3 text-brand-navy">📝 Recent Activity</h3>
+            <div className="space-y-2 text-sm">
+              {Storage.load('content-history', []).slice(-5).reverse().map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center py-2 border-b">
+                  <span className="font-medium capitalize">{item.type}</span>
+                  <span className="text-gray-500">{new Date(item.timestamp).toLocaleString()}</span>
+                </div>
+              ))}
+              {Storage.load('content-history', []).length === 0 && (
+                <p className="text-gray-400 italic">No content generated yet. Start creating!</p>
+              )}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function StatCard({ value, label }) {
+      return (
+        <div className="bg-white p-6 rounded-lg shadow hover:shadow-lg transition">
+          <div className="text-3xl font-bold text-brand-gold">{value}</div>
+          <div className="text-sm text-gray-600">{label}</div>
+        </div>
+      );
+    }
+
+    function QuickLink({ href, label, primary, secondary, outline }) {
+      const className = primary 
+        ? "block bg-brand-navy text-white px-4 py-3 rounded text-center hover:bg-brand-gold transition font-medium"
+        : secondary
+        ? "block bg-brand-gold text-brand-navy px-4 py-3 rounded text-center hover:bg-brand-navy hover:text-white transition font-medium"
+        : "block border-2 border-brand-navy text-brand-navy px-4 py-3 rounded text-center hover:bg-brand-navy hover:text-white transition font-medium";
+      
+      return <a href={href} target="_blank" rel="noopener noreferrer" className={className}>{label}</a>;
+    }
+
+    // AI Creator Component
+    function AICreator() {
+      const [workflow, setWorkflow] = useState('product-upload');
+      const [loading, setLoading] = useState(false);
+      const [output, setOutput] = useState('');
+      const [productData, setProductData] = useState('');
+      const [crmContact, setCrmContact] = useState(null);
+      const [formData, setFormData] = useState({
+        clientName: '',
+        carrierName: '',
+        targetAudience: '',
+        platform: 'Facebook',
+        location: 'Schuylkill County, PA',
+        customPrompt: ''
+      });
+      const fileRef = useRef(null);
+
+      // Check for CRM contact on load
+      useEffect(() => {
+        const contactData = sessionStorage.getItem('crm-selected-contact');
+        if (contactData) {
+          const contact = JSON.parse(contactData);
+          setCrmContact(contact);
+          setFormData(prev => ({
+            ...prev,
+            clientName: contact.name,
+            targetAudience: `${contact.ageRange} year old, ${contact.income} income, interested in ${contact.primaryNeed}`
+          }));
+          sessionStorage.removeItem('crm-selected-contact');
+        }
+      }, []);
+
+      const workflows = {
+        'product-upload': {
+          label: '📤 Product Upload & Content Generator',
+          description: 'Upload product sheets and generate compliant marketing content'
+        },
+        'custom-prompt': {
+          label: '🎯 Custom AI Prompt',
+          description: 'Write your own prompt for specific needs'
+        },
+        'follow-up-email': {
+          label: '✉️ Follow-Up Email',
+          description: 'Generate personalized client emails'
+        },
+        'social-posts': {
+          label: '📣 Social Media Posts',
+          description: 'Create engaging local social content'
+        },
+        'compliance-review': {
+          label: '📕 Compliance Review',
+          description: 'Review and refine content for compliance'
+        }
+      };
+
+      const handleFileUpload = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            setProductData(event.target.result);
+          };
+          reader.readAsText(file);
+        }
+      };
+
+      const generateContent = async () => {
+        setLoading(true);
+        setOutput('');
+
+        try {
+          let prompt = '';
+
+          if (workflow === 'product-upload') {
+            prompt = `You are a compliance-aware insurance content expert for ${CONFIG.brand}.
+
+PRODUCT INFORMATION:
+${productData || '[Product details will be provided]'}
+
+CARRIER/PRODUCT: ${formData.carrierName || 'Generic Insurance Product'}
+TARGET AUDIENCE: ${formData.targetAudience || 'Pennsylvania families'}
+
+Create comprehensive, compliant marketing content including:
+
+1. **Product Overview** (2-3 paragraphs in plain language)
+2. **Client-Friendly Explanation** (150-200 words on how it works)
+3. **Email Template** (subject line + 3 paragraphs)
+4. **Social Media Posts** (3 variations: Facebook/LinkedIn/Instagram)
+5. **Compliance Checklist** (key disclosures, what to avoid, PA requirements)
+
+CRITICAL COMPLIANCE RULES:
+- No guaranteed returns or performance promises
+- No specific tax or legal advice
+- Must include "educational purposes" disclaimer
+- Products subject to underwriting and availability in Pennsylvania
+- Individual results may vary`;
+          } else if (workflow === 'custom-prompt') {
+            prompt = formData.customPrompt || 'Please provide a custom prompt.';
+          if (workflow === 'follow-up-email') {
+            const clientInfo = crmContact 
+              ? `Client: ${crmContact.name}
+Email: ${crmContact.email}
+Phone: ${crmContact.phone}
+Status: ${crmContact.status}
+Primary Need: ${crmContact.primaryNeed}
+Coverage Interest: ${crmContact.coverageType}
+Income Level: ${crmContact.income}
+Age: ${crmContact.ageRange}
+Lead Source: ${crmContact.leadSource}
+Notes: ${crmContact.notes}`
+              : `Client: ${formData.clientName || 'this client'}`;
+
+            prompt = `Draft a professional follow-up email for ${formData.clientName || 'this client'}.
+
+CLIENT CONTEXT:
+${clientInfo}
+
+Include:
+1. Professional subject line
+2. Warm opening
+3. Meeting recap (2-3 paragraphs)
+4. Clear next steps
+5. Call-to-action: ${CONFIG.booking}
+6. Contact information: ${CONFIG.phone}
+7. PA compliance disclaimer
+
+Tone: Professional, warm, action-oriented`;
+          } else if (workflow === 'social-posts') {
+            const audienceInfo = crmContact
+              ? `${crmContact.ageRange} year old, ${crmContact.income} income, interested in ${crmContact.primaryNeed}`
+              : formData.targetAudience || 'Young families';
+
+            prompt = `Create 3 ${formData.platform} post variations for ${CONFIG.brand}.
+
+Target Audience: ${audienceInfo}
+Location: ${formData.location}
+${crmContact ? `Lead Source Insight: This audience typically comes from ${crmContact.leadSource}` : ''}
+
+Each post needs:
+1. Attention-grabbing opening
+2. Relatable problem/scenario
+3. Educational solution (not product-specific)
+4. Clear CTA: ${CONFIG.booking}
+5. Local relevance
+
+Include appropriate hashtags. Keep educational, no guarantees.`;
+          } else if (workflow === 'compliance-review') {
+            prompt = `Review this content for Pennsylvania insurance compliance:
+
+${output || '[Paste content to review]'}
+
+Provide:
+1. Compliant rewritten version
+2. Issues identified
+3. Required PA disclosures`;
+          }
+
+          Storage.append('content-history', {
+            type: workflow,
+            workflow: workflows[workflow].label
+          });
+
+          const response = await fetch("https://api.anthropic.com/v1/messages", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              model: "claude-sonnet-4-20250514",
+              max_tokens: 4000,
+              messages: [{ role: "user", content: prompt }]
+            })
+          });
+
+          const data = await response.json();
+          setOutput(data.content?.[0]?.text || "Error generating content");
+        } catch (error) {
+          setOutput(`Error: ${error.message}`);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      return (
+        <div className="p-6 space-y-6">
+          <h2 className="text-2xl font-bold text-brand-navy">🤖 AI Content Creator</h2>
+
+          <div className="bg-white p-4 rounded-lg shadow">
+            <label className="block text-sm font-medium mb-2 text-brand-navy">Select Workflow</label>
+            <select
+              value={workflow}
+              onChange={(e) => setWorkflow(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+            >
+              {Object.entries(workflows).map(([key, wf]) => (
+                <option key={key} value={key}>{wf.label}</option>
+              ))}
+            </select>
+            <p className="text-sm text-gray-600 mt-2">{workflows[workflow].description}</p>
+          </div>
+
+          {crmContact && (
+            <div className="bg-green-50 border-2 border-green-200 p-4 rounded-lg">
+              <div className="flex justify-between items-start">
+                <div>
+                  <h3 className="font-semibold text-green-800 mb-1">✅ CRM Contact Loaded</h3>
+                  <p className="text-sm text-green-700">
+                    <strong>{crmContact.name}</strong> - {crmContact.primaryNeed}
+                  </p>
+                  <p className="text-xs text-green-600 mt-1">
+                    {crmContact.email} • {crmContact.phone} • {crmContact.status}
+                  </p>
+                </div>
+                <button
+                  onClick={() => setCrmContact(null)}
+                  className="text-green-600 hover:text-green-800 text-sm font-medium"
+                >
+                  Clear
+                </button>
+              </div>
+            </div>
+          )}
+
+          <div className="bg-white p-6 rounded-lg shadow space-y-4">
+            <h3 className="text-lg font-semibold text-brand-navy">Input Information</h3>
+
+            {workflow === 'product-upload' && (
+              <>
+                <div className="border-2 border-dashed border-brand-gold rounded-lg p-6 text-center">
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    accept=".txt,.pdf,.doc,.docx"
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                  <button
+                    onClick={() => fileRef.current?.click()}
+                    className="bg-brand-navy text-white px-6 py-3 rounded hover:bg-brand-gold transition font-medium"
+                  >
+                    📤 Upload Product Sheet
+                  </button>
+                  <p className="text-xs text-gray-500 mt-2">Supports: TXT, PDF, DOC, DOCX</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-brand-navy">Or Paste Product Information</label>
+                  <textarea
+                    value={productData}
+                    onChange={(e) => setProductData(e.target.value)}
+                    className="w-full p-3 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                    rows="6"
+                    placeholder="Paste product details, features, benefits..."
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-brand-navy">Carrier/Product Name</label>
+                  <input
+                    type="text"
+                    value={formData.carrierName}
+                    onChange={(e) => setFormData({...formData, carrierName: e.target.value})}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                    placeholder="e.g., North American Accumulation IUL"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-brand-navy">Target Audience</label>
+                  <input
+                    type="text"
+                    value={formData.targetAudience}
+                    onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                    placeholder="e.g., Young families, Business owners"
+                  />
+                </div>
+              </>
+            )}
+
+            {workflow === 'custom-prompt' && (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-brand-navy">Your Custom Prompt</label>
+                <textarea
+                  value={formData.customPrompt}
+                  onChange={(e) => setFormData({...formData, customPrompt: e.target.value})}
+                  className="w-full p-3 border rounded font-mono text-sm focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                  rows="10"
+                  placeholder="Write your custom AI prompt here..."
+                />
+              </div>
+            )}
+
+            {workflow === 'follow-up-email' && (
+              <div>
+                <label className="block text-sm font-medium mb-1 text-brand-navy">Client Name</label>
+                <input
+                  type="text"
+                  value={formData.clientName}
+                  onChange={(e) => setFormData({...formData, clientName: e.target.value})}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                  placeholder="John and Jane Smith"
+                />
+              </div>
+            )}
+
+            {workflow === 'social-posts' && (
+              <>
+                <div>
+                  <label className="block text-sm font-medium mb-1 text-brand-navy">Target Audience</label>
+                  <input
+                    type="text"
+                    value={formData.targetAudience}
+                    onChange={(e) => setFormData({...formData, targetAudience: e.target.value})}
+                    className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                    placeholder="Young families, professionals..."
+                  />
+                </div>
+                <div className="grid md:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-brand-navy">Platform</label>
+                    <select
+                      value={formData.platform}
+                      onChange={(e) => setFormData({...formData, platform: e.target.value})}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                    >
+                      <option>Facebook</option>
+                      <option>LinkedIn</option>
+                      <option>Instagram</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium mb-1 text-brand-navy">Location</label>
+                    <input
+                      type="text"
+                      value={formData.location}
+                      onChange={(e) => setFormData({...formData, location: e.target.value})}
+                      className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                      placeholder="Schuylkill County, PA"
+                    />
+                  </div>
+                </div>
+              </>
+            )}
+
+            <button
+              onClick={generateContent}
+              disabled={loading}
+              className="w-full bg-brand-navy text-white px-6 py-4 rounded-lg font-semibold text-lg hover:bg-brand-gold transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? '✨ Generating...' : '✨ Generate Content'}
+            </button>
+          </div>
+
+          {output && (
+            <div className="bg-white p-6 rounded-lg shadow">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-brand-navy">Generated Content</h3>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(output);
+                      alert('Copied to clipboard!');
+                    }}
+                    className="text-sm bg-brand-gold text-brand-navy px-4 py-2 rounded hover:bg-brand-navy hover:text-white transition font-medium"
+                  >
+                    📋 Copy
+                  </button>
+                  <button
+                    onClick={() => {
+                      const blob = new Blob([output], { type: 'text/plain' });
+                      const url = URL.createObjectURL(blob);
+                      const a = document.createElement('a');
+                      a.href = url;
+                      a.download = `content-${Date.now()}.txt`;
+                      a.click();
+                    }}
+                    className="text-sm bg-brand-navy text-white px-4 py-2 rounded hover:bg-brand-gold transition font-medium"
+                  >
+                    💾 Download
+                  </button>
+                </div>
+              </div>
+              <div className="prose max-w-none">
+                <pre className="whitespace-pre-wrap text-sm bg-gray-50 p-4 rounded border">{output}</pre>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // CRM Component
+    function CRM() {
+      const [clients, setClients] = useState([]);
+      const [showForm, setShowForm] = useState(false);
+      const [newClient, setNewClient] = useState({
+        name: '',
+        email: '',
+        phone: '',
+        status: 'Prospect',
+        notes: ''
+      });
+
+      useEffect(() => {
+        const saved = Storage.load('clients', []);
+        setClients(saved);
+      }, []);
+
+      const addClient = () => {
+        const updated = [...clients, { ...newClient, id: Date.now(), created: new Date().toISOString() }];
+        setClients(updated);
+        Storage.save('clients', updated);
+        setNewClient({ name: '', email: '', phone: '', status: 'Prospect', notes: '' });
+        setShowForm(false);
+      };
+
+      return (
+        <div className="p-6 space-y-4">
+          <div className="flex justify-between items-center">
+            <h2 className="text-2xl font-bold text-brand-navy">👥 Client Relationship Management</h2>
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-brand-navy text-white px-4 py-2 rounded hover:bg-brand-gold transition font-medium"
+            >
+              {showForm ? '✕ Cancel' : '+ Add Client'}
+            </button>
+          </div>
+
+          {showForm && (
+            <div className="bg-white p-6 rounded-lg shadow space-y-3">
+              <h3 className="font-semibold text-brand-navy">Add New Client</h3>
+              <input
+                placeholder="Full Name"
+                value={newClient.name}
+                onChange={(e) => setNewClient({...newClient, name: e.target.value})}
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+              />
+              <div className="grid md:grid-cols-2 gap-3">
+                <input
+                  placeholder="Email"
+                  type="email"
+                  value={newClient.email}
+                  onChange={(e) => setNewClient({...newClient, email: e.target.value})}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                />
+                <input
+                  placeholder="Phone"
+                  type="tel"
+                  value={newClient.phone}
+                  onChange={(e) => setNewClient({...newClient, phone: e.target.value})}
+                  className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                />
+              </div>
+              <select
+                value={newClient.status}
+                onChange={(e) => setNewClient({...newClient, status: e.target.value})}
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+              >
+                <option>Prospect</option>
+                <option>Active</option>
+                <option>Closed</option>
+                <option>Follow-up</option>
+              </select>
+              <textarea
+                placeholder="Notes"
+                value={newClient.notes}
+                onChange={(e) => setNewClient({...newClient, notes: e.target.value})}
+                className="w-full p-2 border rounded focus:ring-2 focus:ring-brand-gold focus:border-transparent"
+                rows="3"
+              />
+              <button
+                onClick={addClient}
+                className="w-full bg-brand-gold text-brand-navy px-4 py-3 rounded font-semibold hover:bg-brand-navy hover:text-white transition"
+              >
+                Save Client
+              </button>
+            </div>
+          )}
+
+          <div className="bg-white p-6 rounded-lg shadow">
+            <h3 className="font-semibold mb-4 text-brand-navy">Client List ({clients.length})</h3>
+            {clients.length === 0 ? (
+              <div className="text-center py-8 text-gray-400">
+                <p className="mb-4">No clients yet. Add your first client!</p>
+                <a href="https://globalfinancialimpact.fillout.com/t/tMz7ZcqpaZus" target="_blank" rel="noopener noreferrer"
+                  className="inline-block bg-brand-navy text-white px-6 py-3 rounded hover:bg-brand-gold transition font-medium">
+                  📝 New Client Application
+                </a>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {clients.map(client => (
+                  <div key={client.id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition">
+                    <div className="flex justify-between items-start">
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-lg text-brand-navy">{client.name}</h4>
+                        <div className="text-sm text-gray-600 space-y-1 mt-2">
+                          <p>📧 {client.email}</p>
+                          <p>📱 {client.phone}</p>
+                          {client.notes && <p className="italic">"{client.notes}"</p>}
+                        </div>
+                      </div>
+                      <span className={`px-3 py-1 rounded text-xs font-medium ${
+                        client.status === 'Active' ? 'bg-green-100 text-green-800' :
+                        client.status === 'Prospect' ? 'bg-blue-100 text-blue-800' :
+                        client.status === 'Follow-up' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-gray-100 text-gray-800'
+                      }`}>
+                        {client.status}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+            <h4 className="font-semibold mb-2 text-brand-navy">🔗 Notion Integration</h4>
+            <p className="text-sm text-gray-700 mb-3">
+              Export your client list to CSV for Notion integration.
+            </p>
+            <button
+              onClick={() => {
+                const csv = 'Name,Email,Phone,Status,Notes,Created\n' +
+                  clients.map(c => `"${c.name}","${c.email}","${c.phone}","${c.status}","${c.notes}","${c.created}"`).join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'latimore-clients.csv';
+                a.click();
+              }}
+              className="bg-brand-navy text-white px-4 py-2 rounded text-sm hover:bg-brand-gold transition font-medium"
+            >
+              📊 Export to CSV
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    // Calendar Component
+    function Calendar() {
+      return (
+        <div className="p-6 space-y-4">
+          <h2 className="text-2xl font-bold text-brand-navy">📆 Calendar & Appointments</h2>
+          <div className="bg-white p-6 rounded-lg shadow">
+            <p className="text-gray-600 mb-4">Manage consultations and follow-ups.</p>
+            <a href={CONFIG.booking} target="_blank" rel="noopener noreferrer"
+              className="inline-block bg-brand-navy text-white px-6 py-3 rounded hover:bg-brand-gold transition font-medium">
+              📅 Schedule Consultation
+            </a>
+          </div>
+        </div>
+      );
+    }
+
+    // Resources Component
+    function Resources() {
+      return (
+        <div className="p-6 space-y-4">
+          <h2 className="text-2xl font-bold text-brand-navy">📂 Resources & Tools</h2>
+          <div className="space-y-3">
+            <div className="bg-white p-6 rounded-lg shadow">
+              <h3 className="font-semibold mb-3 text-brand-navy">🔗 Quick Links</h3>
+              <div className="grid md:grid-cols-2 gap-3 text-sm">
+                <ResourceLink href={CONFIG.quote} label="🎯 Ethos Life Instant Quote" />
+                <ResourceLink href="https://jackson1989-design.github.io/latimore-life-legacy-site/" label="🌐 Main Website" />
+                <ResourceLink href="https://globalfinancialimpact.fillout.com/t/tMz7ZcqpaZus" label="📋 Client Application" />
+                <ResourceLink href="https://jackson1989-design.github.io/latimore-life-legacy-site/card/" label="💼 Digital Business Card" />
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function ResourceLink({ href, label }) {
+      return (
+        <a href={href} target="_blank" rel="noopener noreferrer" 
+          className="block p-3 border border-gray-200 rounded hover:border-brand-gold transition">
+          {label}
+        </a>
+      );
+    }
+
+    // Main App Component
+    function App() {
+      const [activeTab, setActiveTab] = useState('dashboard');
+
+      const tabs = {
+        dashboard: { label: 'Dashboard', emoji: '📊', component: <Dashboard /> },
+        creator: { label: 'AI Creator', emoji: '✍️', component: <AICreator /> },
+        crm: { label: 'CRM', emoji: '👥', component: <CRM /> },
+        calendar: { label: 'Calendar', emoji: '📆', component: <Calendar /> },
+        resources: { label: 'Resources', emoji: '📂', component: <Resources /> }
+      };
+
+      return (
+        <div className="min-h-screen flex flex-col">
+          <header className="bg-brand-navy text-brand-gold px-6 py-4 flex items-center justify-between shadow-lg">
+            <div>
+              <h1 className="text-xl font-black">Latimore AI Hub</h1>
+              <p className="text-xs text-gray-300">Analytics • CRM • Product Upload • Custom Prompts</p>
+            </div>
+            <div className="flex gap-3">
+              <a href="../crm/index.html" 
+                className="text-sm bg-white text-brand-navy px-4 py-2 rounded hover:bg-brand-gold transition font-medium">
+                💼 CRM System
+              </a>
+              <a href="https://jackson1989-design.github.io/latimore-life-legacy-site/" 
+                className="text-sm underline hover:text-white transition">
+                ← Main Site
+              </a>
+            </div>
+          </header>
+
+          <div className="flex flex-1">
+            <nav className="w-48 bg-white border-r border-gray-100 py-6">
+              <ul className="space-y-3">
+                {Object.keys(tabs).map((key) => (
+                  <li key={key}>
+                    <button
+                      className={`w-full flex items-center gap-2 px-4 py-3 rounded-r-full text-left text-sm font-medium transition-colors ${
+                        activeTab === key
+                          ? 'bg-brand-gold text-brand-navy'
+                          : 'text-brand-navy hover:bg-gray-50'
+                      }`}
+                      onClick={() => setActiveTab(key)}
+                    >
+                      <span>{tabs[key].emoji}</span>
+                      <span>{tabs[key].label}</span>
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <main className="flex-1 bg-gray-50 overflow-y-auto">
+              {tabs[activeTab].component}
+            </main>
+          </div>
+
+          <footer className="bg-white border-t border-gray-100 p-4 text-center text-xs text-gray-500">
+            <p>
+              AI-Powered by Claude | Built for {CONFIG.name} |{' '}
+              <a href={CONFIG.booking}
+                className="text-brand-navy font-semibold underline hover:text-brand-gold">
+                Schedule Consultation
+              </a>
+            </p>
+            <p className="mt-2">
+              © {new Date().getFullYear()} {CONFIG.brand}. All rights reserved.
+            </p>
+          </footer>
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
