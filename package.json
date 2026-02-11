@@ -1,0 +1,12 @@
+{
+  "name": "latimore-command-center",
+  "version": "1.0.0",
+  "description": "Latimore Life & Legacy Command Center",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "author": "Jackson M. Latimore Sr.",
+  "license": "UNLICENSED",
+  "private": true
+}
